@@ -1,0 +1,36 @@
+{
+  "name": "sessions",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">= 4.4.3"
+  },
+  "description": "Demo using Vuex, Koa, Socket.io and Mongo",
+  "main": "sessions-basic.js",
+  "scripts": {
+    "start": "./sessions-basic.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rafleon/sessions.git"
+  },
+  "dependencies": {
+    "vue": "2.0.0-beta.1",
+    "vuex": "2.0.0-rc.3",
+    "get-env":  "0.4.0",
+    "koa.io": "0.0.3",
+    "co-mongo-fork": "0.0.2",
+    "koa-static": "2.0.0",
+    "koa": "1.2.0",
+    "koa-compress": "1.0.9",
+    "koa-conditional-get": "1.0.3",
+    "koa-etag": "2.1.1",
+    "co": "4.6.0",
+    "socket.io": "1.4.8"
+  },
+  "license": "MIT"
+}
+
+    
+
+    
+
