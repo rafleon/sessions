@@ -1,47 +1,48 @@
-#!/usr/local/lib/nvm/versions/node/v6.3.0/bin/node
+#!/usr/bin/env node
 
 var env = require('get-env')();
 
 var co = require('co');
 var comongo = require('co-mongo-fork');
 var koa = require('koa');
+var convert = require('koa-convert');
+var serve = require('koa-static');
 var compress = require('koa-compress');
 var conditional = require('koa-conditional-get');
 var etag = require('koa-etag');
-var serve = require('koa-static');
-var http = require('http');
-var ioserver = require('socket.io');
+var IO = require('koa-socket');
 
 // *** end loading. 
 
 // *** Start building the server ...
-var app = koa();
+var app = new koa();
+var io = new IO();
+io.attach(app);
 console.log("Currently in "+app.env+ " ...");
 
 // Respond with 304 if fresh
-app.use(conditional());
-app.use(etag());
+app.use(convert(conditional()));
+app.use(convert(etag()));
 
 // compress everything over 2K
-app.use(compress({
+app.use(convert(compress({
   threshold: 2048,
-  flush: require('zlib').Z_SYNC_FLUSH}));
+  flush: require('zlib').Z_SYNC_FLUSH})));
 
 // serve static assets.
-app.use(serve('node_modules/vue/dist'));
-app.use(serve('node_modules/vuex/dist'));
-app.use(serve('www'+env,{index:'index.html'}));
+app.use(convert(serve('node_modules/vue/dist')));
+app.use(convert(serve('node_modules/vuex/dist')));
+app.use(convert(serve('www'+env)));
 
-// create an all-purpose server for koa and socket.io
-var server = http.createServer(app.callback());
-var io = ioserver(server);
-
-io.on('connection', co.wrap(function *(socket){
-  console.log("New socket connection with id: "+socket.id);
+io.on('connection',co.wrap(function *(ctx) {
+  console.log("New socket connection with id: "+ctx.socket.id);
   var db = yield comongo.connect('mongodb://localhost/sessions');
-  var itemscoll = yield db.collection('items');
-  socket.on('mutation', co.wrap(function *(mutation){
-    switch(mutation.type){
+  ctx.socket.itemscoll = yield db.collection('items');
+}));
+
+io.on('mutation',co.wrap(function *(ctx,mutation) {
+  var itemscoll = ctx.socket.socket.itemscoll;
+  switch(mutation.type){
     case 'ADDITEM':
       yield itemscoll.update({desc:mutation.payload},
                              {$inc:{num:1}},
@@ -57,14 +58,14 @@ io.on('connection', co.wrap(function *(socket){
       break;
     default:
       console.log('Invalid mutation.');
-    }
-  }));
-  socket.on('refresh', co.wrap(function *(){
-    var allitems = yield itemscoll.find({},{_id:0}).toArray();
-    socket.emit('setstate',allitems);
-  }));
+  }}));
+
+io.on('refresh', co.wrap(function* (ctx) {
+  var itemscoll = ctx.socket.socket.itemscoll;
+  var allitems = yield itemscoll.find({},{_id:0}).toArray();
+  ctx.socket.emit('setstate',allitems);
 }));
 
 var port = 3000;
-server.listen(port);
+app.listen(port);
 console.log('Listening on port '+port);
