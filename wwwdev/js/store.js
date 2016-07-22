@@ -63,8 +63,24 @@ var refreshstate = function (){
   socket.emit('refresh');
 }
 
+function makeAction (type) {
+  return ({ commit }, payload) => commit(type, payload);
+}
+
+const actions = {
+  additem: makeAction('ADDITEM'),
+  remitem: makeAction('REMITEM'),
+  remall: makeAction('REMALL')
+}
+  
+const getters = {
+  items: state => state.items
+}
+
 var store = new Vuex.Store({
   state,
+  getters,
+  actions,
   mutations,
   plugins: [sioplugin]
 })

@@ -1,22 +1,30 @@
-const app = new Vue({
-  el: '#app',
-  data: state,
+const mylist = new Vue({
+  el: '#mylist',
   store,
-  vuex: {
-    getters: {
-      items: state => state.items
-    }
-  }
+  computed: Vuex.mapGetters([
+    'items'
+  ]),
+  methods: Vuex.mapActions([
+    'additem',
+    'remitem',
+    'remall',
+  ])
 })
 
+const mynewitem = new Vue({
+  el: '#newitembox',
+  data: {
+    newitem: ''
+  },
+  methods: {
+    addnewitem: function(){
+      var text=this.newitem.trim();
+      if(text!=''){
+        store.commit('ADDITEM',text);
+      }
+      this.newitem='';
+    }
+  }
+});
+
 refreshstate();
-// need to give Vue a moment to initialize.
-setTimeout(function(){ 
-//  store.commit('REMALL');
-  store.commit('ADDITEM','bread');
-  store.commit('ADDITEM','bread');
-  store.commit('ADDITEM','eggs');
-  store.commit('ADDITEM','eggs');
-  store.commit('REMITEM','eggs');
-  store.commit('ADDITEM','bananas');
-}, 500);

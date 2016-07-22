@@ -5,8 +5,30 @@
   <title>Sessions</title>
 </head>
 <body>
-  <div id="app">
-    {{ items }} 
+  <div id="mylist">
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Number</th>
+          <th></th>
+          <th></th>
+          </tr>
+        </thead>
+      <tbody>
+      <tr v-for="item in items">
+        <td>{{ item.desc }}</td>
+        <td align="right">{{ item.num }}</td>
+        <td><button @click="additem(item.desc)">+</button></td>
+        <td><button @click="remitem(item.desc)">-</button></td>
+      </tr>
+      </tbody>
+    </table>
+    <button @click="remall">Remove all items.</button>
+  </div>
+  <div id="newitembox">
+    <input v-model="newitem" v-on:keyup.enter="addnewitem"
+    placeholder="Enter new item.">
   </div>
   <script src="vue.js"></script>
   <script src="vuex.js"></script>
